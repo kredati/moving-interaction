@@ -1,44 +1,80 @@
-var keyDrawer = {
-  drawMostRecentKey: function() {
-    this.drawKeyLetter();
-    this.drawKeyCode();
-  },
+var myBall;
 
-  drawKeyLetter: function() {
-    text(key, 30, 60);
-  },
+var bouncyBalls = [];
 
-  drawKeyCode: function() {
-    text(keyCode, 30, 100);
-  }
+var score = 0;
+
+var updateAndDisplay = function(shape) {
+  shape.update();
+  shape.display();
 };
 
-var arrowListener = new KeyListener(keyListenerMap.rightArrow, keyDrawer.drawMostRecentKey, keyDrawer);
+var checkForInteractiveCollision = function (ball, index) {
+  if (ball.checkForCollision(myBall)) collideWithInteractive(index);
+};
 
-var letterListener = new KeyListener('A', keyDrawer.drawMostRecentKey, keyDrawer);
+var collideWithInteractive = function (index) {
+  bouncyBalls.splice(index, 1);
+  score++;
+};
 
-var backspaceListener = new KeyListener(keyListenerMap.backspace, keyDrawer.drawMostRecentKey, keyDrawer);
+var displayScore = function() {
+  textSize(32);
+  fill(255, 255, 255, 160);
+  text(score, 20, 40);
+};
+
+var timer = new Timer();
+
+var displayTimer = function() {
+  textSize(32);
+  fill(255, 255, 255, 160);
+  text(timer.getPrettyElapsedTime(), 20, height - 20);
+};
+
+var newGame = function() {
+  gameActive = true;
+  score = 0;
+  if (bouncyBalls.length < gameBalls) makeAndInitializeBouncyBalls(gameBalls);
+  myBall = new InteractiveBall(mouseX, mouseY);
+  myBall.initialize();
+  timer.unpause();
+};
+
+var makeAndInitializeBouncyBalls = function(numberOfBalls) {
+  while (bouncyBalls.length < numberOfBalls) bouncyBalls.push(new BouncyBall(width/ 2, height / 2));
+  bouncyBalls.forEach(function initialize(ball) {
+    ball.initialize();
+  });
+};
+
+var gameBalls = 20;
+
+var gameActive = false;
 
 setup = function () {
   // your code goes here
-  createCanvas(300, 300);
+  createCanvas(600, 600);
+  timer.pause();
 };
 
 draw = function () {
-  background(200);
-  // your code goes here
-  arrowListener.listen();
-  letterListener.listen();
-  backspaceListener.listen();
+  background(0);
+  displayScore();
+  displayTimer();
+  if (gameActive) {
+    updateAndDisplay(myBall);
+    bouncyBalls.forEach(function checkForInteractiveCollision(ball, index) {
+      if (ball.checkForCollision(myBall)) collideWithInteractive(index);
+    });
+  }
+  bouncyBalls.forEach(updateAndDisplay);
+  if (bouncyBalls.length === 0) {
+    gameActive = false;
+    timer.pause();
+  }
 };
 
-function keyPressed() {
-  if (keyCode == UP_ARROW) {
-    console.log("UP!!: " + UP_ARROW);
-  } else if (keyCode == DOWN_ARROW) {
-    console.log("DOWN!!: " + DOWN_ARROW);
-  } else {
-    console.log("Key pressed: " + key + ": " + keyCode);
-  }
-  return false; // prevent default
-}
+mouseClicked = function() {
+  if (!gameActive) newGame();
+};
