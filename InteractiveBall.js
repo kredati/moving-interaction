@@ -1,5 +1,6 @@
 var InteractiveBall = function(x, y) {
   this.position = new p5.Vector(x, y);
+  this.direction = new p5.Vector(0, 0);
 };
 
 InteractiveBall.prototype = {
@@ -22,7 +23,9 @@ InteractiveBall.prototype = {
   },
 
   update: function() {
+    this.resetDirection();
     this.listen();
+    this.move();
   },
 
   listen: function() {
@@ -31,24 +34,36 @@ InteractiveBall.prototype = {
     });
   },
 
+  resetDirection: function() {
+    this.direction.x = 0;
+    this.direction.y = 0;
+  },
+
+  move: function() {
+    if (this.direction.mag() > 0) this.normalizeSpeed();
+    this.position.x = constrain(this.position.x + this.direction.x, this.radius, width - this.radius);
+    this.position.y = constrain(this.position.y + this.direction.y, this.radius, height - this.radius);
+  },
+
+  normalizeSpeed: function() {
+    this.direction.normalize();
+    this.direction.mult(this.speed);
+  },
+
   moveUp: function() {
-    if (this.position.y > this.radius) this.position.y -= this.speed;
-    else this.position.y = this.radius;
+    this.direction.y -= 1;
   },
 
   moveLeft: function() {
-    if (this.position.x > this.radius) this.position.x -= this.speed;
-    else this.position.x = this.radius;
+    this.direction.x -= 1;
   },
 
   moveRight: function() {
-    if (this.position.x < width - this.radius) this.position.x += this.speed;
-    else this.position.x = width - this.radius;
+    this.direction.x += 1;
   },
 
   moveDown: function() {
-    if (this.position.y < height - this.radius) this.position.y += this.speed;
-    else this.position.y = height - this.radius;
+    this.direction.y += 1;
   }
 
 };
