@@ -4,6 +4,8 @@ var bouncyBalls = [];
 
 var score = 0;
 
+var timer = new Timer();
+
 var updateAndDisplay = function(shape) {
   shape.update();
   shape.display();
@@ -24,8 +26,6 @@ var displayScore = function() {
   text(score, 20, 40);
 };
 
-var timer = new Timer();
-
 var displayTimer = function() {
   textSize(32);
   fill(255, 255, 255, 160);
@@ -38,7 +38,7 @@ var newGame = function() {
   if (bouncyBalls.length < gameBalls) makeAndInitializeBouncyBalls(gameBalls);
   myBall = new InteractiveBall(mouseX, mouseY);
   myBall.initialize();
-  timer.unpause();
+  timer.restart();
 };
 
 var makeAndInitializeBouncyBalls = function(numberOfBalls) {
