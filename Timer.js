@@ -25,8 +25,8 @@ Timer.prototype = {
 
   // initialize() starts the counter running; this need only be used internally
   initialize: function() {
-    this.init = new Date();
-    this.now = new Date();
+    this.init = Date.now();
+    this.now = Date.now();
     this.running = true;
   },
 
@@ -44,18 +44,19 @@ Timer.prototype = {
   unpause: function() {
     var elapsedSoFar = this.millisecondsElapsed();
     this.initialize();
-    this.init = new Date(this.now.getTime() - elapsedSoFar);
+    var newInit = new Date(this.now - elapsedSoFar);
+    this.init = newInit.getTime();
   },
 
   // update() is only called internally; it effectively makes current the internal representation of time
   update: function() {
-    if (this.running) this.now = new Date();
+    if (this.running) this.now = Date.now();
   },
 
   // millisecondsElapsed() tells you how many millisconds have elapsed since the timer was last initialize()ed
   millisecondsElapsed: function() {
     this.update();
-    return this.now.getTime() - this.init.getTime();
+    return this.now - this.init;
   },
 
   // secondsElapsed() converts milliseconds elapsed to seconds elapsed
