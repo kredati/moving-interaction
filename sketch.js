@@ -1,80 +1,90 @@
-var myBall;
+var game = {
 
-var bouncyBalls = [];
+  bouncyBalls: [],
+  gameBalls: 20,
+  score: 0,
+  timer: new Timer(),
+  gameActive: false,
 
-var score = 0;
+  initialize: function() {
+    this.timer.pause();
+  },
 
-var timer = new Timer();
+  display: function() {
+    this.displayScore();
+    this.displayTimer();
+    if (this.gameActive) this.updateAndDisplayBalls();
+  },
 
-var updateAndDisplay = function(shape) {
-  shape.update();
-  shape.display();
+  update: function() {
+    if (this.bouncyBalls.length === 0) {
+      this.gameActive = false;
+      this.timer.pause();
+    }
+  },
+
+  newGame: function() {
+    this.gameActive = true;
+    this.score = 0;
+    if (this.bouncyBalls.length < this.gameBalls) this.makeAndInitializeBouncyBalls(this.gameBalls);
+    this.myBall = new InteractiveBall(mouseX, mouseY);
+    this.myBall.initialize();
+    this.timer.restart();
+  },
+
+  makeAndInitializeBouncyBalls: function(numberOfBalls) {
+    while (this.bouncyBalls.length < numberOfBalls) this.bouncyBalls.push(new BouncyBall(width/ 2, height / 2));
+    this.bouncyBalls.forEach(function initialize(ball) {
+      ball.initialize();
+    });
+  },
+
+  updateAndDisplayBalls: function() {
+    this.updateAndDisplay(this.myBall);
+    this.bouncyBalls.forEach(this.checkForInteractiveIntersection, this);
+    this.bouncyBalls.forEach(this.updateAndDisplay);
+  },
+
+  updateAndDisplay: function(shape) {
+    shape.update();
+    shape.display();
+  },
+
+  checkForInteractiveIntersection: function(ball, index) {
+    if (ball.checkForIntersection(this.myBall)) this.intersectWithInteractive(index);
+  },
+
+  intersectWithInteractive: function(index) {
+    this.bouncyBalls.splice(index, 1);
+    this.score++;
+  },
+
+  displayScore: function() {
+    textSize(32);
+    fill(255, 255, 255, 160);
+    text(this.score, 20, 40);
+  },
+
+  displayTimer: function() {
+    textSize(32);
+    fill(255, 255, 255, 160);
+    text(this.timer.getPrettyElapsedTime(), 20, height - 20);
+  },
+
 };
-
-var checkForInteractiveCollision = function (ball, index) {
-  if (ball.checkForCollision(myBall)) collideWithInteractive(index);
-};
-
-var collideWithInteractive = function (index) {
-  bouncyBalls.splice(index, 1);
-  score++;
-};
-
-var displayScore = function() {
-  textSize(32);
-  fill(255, 255, 255, 160);
-  text(score, 20, 40);
-};
-
-var displayTimer = function() {
-  textSize(32);
-  fill(255, 255, 255, 160);
-  text(timer.getPrettyElapsedTime(), 20, height - 20);
-};
-
-var newGame = function() {
-  gameActive = true;
-  score = 0;
-  if (bouncyBalls.length < gameBalls) makeAndInitializeBouncyBalls(gameBalls);
-  myBall = new InteractiveBall(mouseX, mouseY);
-  myBall.initialize();
-  timer.restart();
-};
-
-var makeAndInitializeBouncyBalls = function(numberOfBalls) {
-  while (bouncyBalls.length < numberOfBalls) bouncyBalls.push(new BouncyBall(width/ 2, height / 2));
-  bouncyBalls.forEach(function initialize(ball) {
-    ball.initialize();
-  });
-};
-
-var gameBalls = 20;
-
-var gameActive = false;
 
 setup = function () {
   // your code goes here
   createCanvas(600, 600);
-  timer.pause();
+  game.initialize();
 };
 
 draw = function () {
   background(0);
-  displayScore();
-  displayTimer();
-  if (gameActive) {
-    updateAndDisplay(myBall);
-    bouncyBalls.forEach(function checkForInteractiveCollision(ball, index) {
-      if (ball.checkForCollision(myBall)) collideWithInteractive(index);
-    });
-  }
-  bouncyBalls.forEach(updateAndDisplay);
-  if (bouncyBalls.length === 0) {
-    gameActive = false;
-    timer.pause();
-  }
+  game.update();
+  game.display();
 };
 
 mouseClicked = function() {
-  if (!gameActive) newGame();
+  if (!game.gameActive) game.newGame();
 };
